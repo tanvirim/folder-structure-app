@@ -29,12 +29,13 @@ function Folder({ folder, onEdit, onDelete, onAddChild }) {
       <div className='flex gap-5'>
         <div className='flex justify-center items-center gap-2'>
           <div>
-            <FcOpenedFolder size={60} className='self-centered' />
+            <FcOpenedFolder size={40} className='self-centered' />
           </div>
-          <div className='text-3xl'>{folder.name}</div>
+          <div className='text-2xl font-bold'>{folder.name}</div>
         </div>
+
         <button
-          className=' text-sm p-3  text-white bg-red-500 p-2 rounded-md ring-2  hover:bg-white  hover:text-red-500'
+          className=' text-xl py-1 px-3 text-white bg-red-500  rounded-md ring-2  hover:bg-white  hover:text-red-500'
           onClick={() => onDelete(folder._id)}
         >
           <AiOutlineDelete />
@@ -138,7 +139,7 @@ function App() {
 
   const removeFolder = (node, folderId) => {
     // Recursively remove the folder from the tree
-    node.children = node.children.filter((child) => child._id !== folderId);
+    node.children = node?.children?.filter((child) => child._id !== folderId);
     node.children.forEach((child) => {
       removeFolder(child, folderId);
     });
