@@ -85,13 +85,38 @@ app.put('/api/folders/:id', async (req, res) => {
 });
 
 app.delete('/api/folders/:id', async (req, res) => {
-  const folderId = req.params.id;
   try {
-    await Folder.findByIdAndRemove(folderId);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error deleting folder' });
+    const folderId = req.params.id;
+    // Find the node to delete
+    const nodeToDelete = await Folder.findById(folderId.trim()).exec();
+
+    if (!nodeToDelete) {
+      return res.status(404).send('Node not found');
+    }
+
+    // Function to recursively delete a branch and its descendants up to a certain depth
+    async function deleteBranch(node, depth) {
+      if (depth === 0) {
+        // Stop at the specified depth and do not delete further descendants
+        return;
+      }
+      const descendants = await Folder.find({ parent: node._id }).exec();
+      for (const descendant of descendants) {
+        await deleteBranch(descendant, depth - 1);
+      }
+      await node.deleteOne();
+    }
+
+    // Specify the desired depth (e.g., 1 for direct descendants)
+    const depthToDelete = 10;
+
+    // Start the recursive deletion for the branch
+    await deleteBranch(nodeToDelete, depthToDelete);
+
+    return res.status(200).send('Branch and descendants deleted');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Error deleting branch and descendants');
   }
 });
 
